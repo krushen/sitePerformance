@@ -1,0 +1,238 @@
+﻿
+@{
+    ViewBag.Title = "PerformSites";
+}
+@model IEnumerable<string>
+<div style="position:relative; height:440px;">
+    <div class="form-group">
+        <form action="#anchor">
+            <label for="textGo" style="font-size:13px;">Enter URL:</label>
+            <input type="text" class="form-control" id="textGo" name="url" maxlength="40" style="font-size:12px;" required="required" title="example: http://www.site.com"
+                   pattern="^(http|https)://[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-‌​]+$" placeholder="http://www.site.com" />
+        </form>
+    </div>
+    <input id="btnRun" class="btn btn-primary" type="submit" value="Run Test" /> <input id="btnChart" class="btn btn-primary" type="submit" onclick=" drawChart()" value="Drow Chart" />
+    <input id="btnRunHistory" class="btn btn-warning"
+                                                                                        type="submit" value=" History " onClick="window.location.href='@Url.Action("Index","History")';" target="_blank" />
+    <div><label style="font-size:12px;color:brown;" id="print"></label></div>
+    <div id="chart_div"
+         style="position: absolute; left: 330px; top: 0px;  width: 80%; height: 420px;">
+    </div>
+
+</div>
+
+<div></div>
+<div id="tableContent"  style="width : 80%; height: 400px;"></div>
+
+@section scripts
+{
+    <script src="~/Scripts/jquery.ajax-cross-origin.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="~/Scripts/jquery.tablesorter.js"></script>
+
+    <script>
+
+    $(function () {
+        $("#btnRun").click(function () {
+            var reg = new RegExp("^(http|https)://[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-‌​]+$");
+            var rezz = reg.test($(textGo).val());
+
+            if (rezz == true) {
+                $("#print").text("Please wait for measure sites response time ");
+                makeRequestFirst();
+            }
+            else {
+                $("#print").text("Please enter correct URL");
+            }
+        });
+        function makeRequestFirst() {
+            var arrTableData = [];
+            var urlName = $("#textGo").val();
+            var startTime = 0;
+            var endTime = 0;
+            //var minValue = 0;
+            //var maxValue = 0;
+            //var timeCount = 0;
+            $.ajaxPrefilter( function (options) {
+                if (options.crossDomain && jQuery.support.cors) {
+                    var http = (window.location.protocol === 'http:' ? 'http:' : 'https:');
+                    options.url = http + '//cors-anywhere.herokuapp.com/' + options.url;
+                }
+            });
+           // jQuery.ajaxSetup({ async: false });
+            $.get(
+                urlName,
+                function (response) {
+                    var urlArray = new Array();
+                    $(response).find('a').each(function () {
+                        urlArray.push($(this).attr('href'));
+                    });
+                    $.ajax({
+                        url: '/Main/SiteParse',
+                        type: 'POST',
+                        async: false,
+                        data: { 'urlName': urlName, 'urlArray[]': urlArray },
+                        dataType: 'json',
+                        contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+                        success: function (result) {
+                            //  startTime = (new Date()).getTime();
+                            var arrSite = $.map(result, function (el) { return el });
+                            var $table = $('<table/>');
+                            $table.addClass("table table-striped  header-fixed");
+
+                            $table.append("<thead><tr><th>Site Name</th><th>Min response time(sec)</th>"+
+                                "<th>Max response time(sec)</th></tr></thead>");
+                            $table.append("<tbody>");
+                            $("#tableContent").empty();
+                            $table.append("</tbody>");
+                            $table.attr("id", "table");
+                            $table.addClass('tablesorter');
+                           // $table.attr("overflow", "scroll");
+                            $("#tableContent").append($table);
+                            $("#table").attr('style','height: 400px');
+                            $("#table").attr('style','height: 300px');
+                            $("#table").attr('style','overflow:scroll');
+                            $("#table > tbody").attr( "display","block");
+                            $("#table tbody:nth-child(1)").attr( "height","75px");
+                            $("#table tbody:nth-child(1)").attr( "overflow-y","auto");
+                            var minValue = 0;
+                            var maxValue = 0;
+                            var timeCount = 0;
+                            var obj = {};
+                            obj.count = 15;
+                            obj.counter = 1;
+                            $.each(arrSite, function (index, item) {
+                                obj.counter = 1;
+                                  function sendAjax() {
+                                    $.ajax({
+                                        url: item,
+                                        type: 'GET',
+                                       // async: false,
+                                        beforeSend: function () {
+                                            startTime = (new Date()).getTime();
+                                            endTime = 0;
+                                        },
+                                        success: function () {
+                                            endTime = (new Date()).getTime();
+                                            timeCount = (endTime - startTime) / 1000;
+                                            $("#print").text(item + "   " + timeCount);
+                                            if (timeCount != 0) {
+                                                var MyRows = $('#table').find('tr');
+                                                var mySite = "";
+                                                var flag = true;
+                                                for (var i = 1; i < MyRows.length; i++) {
+                                                    mySite = String($(MyRows[i]).find('td:eq(' + 0 + ')').html());
+                                                    var myMin = ($(MyRows[i]).find('td:eq(' + 1 + ')').html());
+                                                    var myMax = $(MyRows[i]).find('td:eq(' + 2 + ')').html();
+                                                    if (mySite == item) {
+                                                        flag = false;
+                                                        if (timeCount <= myMin) {
+                                                            $(MyRows[i]).find('td:eq(' + 1 + ')').text(timeCount);
+                                                            $("table").tablesorter({
+                                                                sortList: [[1, 1], [2, 1]]
+                                                            });
+                                                            if (i<=arrTableData.length)
+                                                                arrTableData[i].minValue = Math.round(timeCount * 1000);
+                                                        }
+
+                                                        if (timeCount > myMax) {
+                                                            $(MyRows[i]).find('td:eq(' + 2 + ')').text(timeCount);
+                                                            $("table").tablesorter({
+                                                                sortList: [[1, 1], [2, 1]]
+                                                            });
+                                                            if (i <= arrTableData.length)
+                                                                arrTableData[i].maxValue = Math.round(timeCount * 1000);
+                                                        }
+                                                    }
+                                                }
+                                                if (flag==true) {
+                                                    $('#table').append('<tr><td>' + item + '</td><td>' + timeCount + '</td> <td>' + timeCount + '</td></tr>');
+                                                    var dataRow = { 'site': item, 'minValue': timeCount*1000, 'maxValue': timeCount*1000 };
+                                                    arrTableData.push(dataRow);
+                                                }
+                                            }
+                                            obj.counter++;
+                                            if (obj.counter < obj.count)
+                                                setTimeout(function () { sendAjax() }, 8000);
+                                            else {
+                                                chartDataSend(urlName, arrTableData, arrSite.length);
+                                            }
+                                        }
+                                    });
+                                }
+                                  setTimeout(function () { sendAjax() }, 8000);
+                            });
+                        }
+                    })
+                }).fail(function () {
+                    $("#print").text(" URL is incorrect");
+                });
+        }
+    });
+
+    function chartDataSend(urlName,arrTableData,countSite) {
+        $("#print").text("Test is complete");
+        var arrChart = [];
+        for (var i = 0; i < arrTableData.length; i++) {
+            if (arrTableData[i].minValue > arrTableData[i].maxValue)
+                arrTableData[i].minValue = arrTableData[i].maxValue;
+            var str = "\'" + arrTableData[i].site + "\'" + "," + Math.round(arrTableData[i].minValue) + ","
+                +Math.round(arrTableData[i].maxValue) + "";
+            arrChart.push(str);
+        }
+        $.ajax({
+            url: '/Main/DrawData',
+            type: 'POST',
+            async: false,
+            data: { 'urlName': urlName, 'chartInfo[]': arrChart },
+            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+            success: function () {
+              //  drawChart();
+            }
+        });
+    }
+
+    </script>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart());
+
+      function drawChart() {
+          $.ajax({
+              url: '/Main/DrawChart',
+              type: 'POST',
+              data: {},
+              async: false,
+              dataType: 'json',
+              contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+              success: function (result) {
+                  $("table").tablesorter({
+                      sortList: [[1, 1], [2, 1]]
+                  });
+                  var arrChart = $.map(result, function (el) { return el });
+                  var data = new google.visualization.DataTable();
+                  data.addColumn('string', 'site');
+                  data.addColumn('number', 'maxValue(ms) ');
+                  data.addColumn('number', 'minValue(ms) ');
+                  for (var i = 0; i < arrChart.length; i++) {
+                      var arrValue = arrChart[i].split(',');
+                      data.addRow([arrValue[0], parseInt(arrValue[1]),parseInt(arrValue[2])]);
+                  }
+                  var options = {
+                      title: 'Test result of pages speed',
+                      width: "90%", height: "90%",
+                     // vAxis: {maxValue: 15}
+                  //  hAxis: { title: 'Sites', titleTextStyle: { color: '#333' } },
+                      vAxis: { minValue: 0 }
+                  };
+
+                  var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                  chart.draw(data, options);
+              }
+          });
+
+      }
+    </script>
+}

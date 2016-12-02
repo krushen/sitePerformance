@@ -1,0 +1,80 @@
+﻿@using WebPerform.Models;
+@model IEnumerable<SiteInfo>
+@{
+    ViewBag.Title = "History";
+    WebGrid grid = new WebGrid(source: Model, canSort: false,canPage:false);
+}
+
+
+
+<p2 class="text-capitalize">Sites History</p2>
+
+@using (Html.BeginForm("Index", "History", FormMethod.Post))
+{
+    <div>
+        <label style="font-size:13px;">Please choise site:</label>
+        @Html.DropDownList("Site", ViewBag.Sites as SelectList, new { @class = "selectpicker" });
+    </div>
+    <input  id="btnOk" class="btn btn-primary" type="submit" value="Make Table" />
+    <input type="button" class="btn btn-warning" value="Return" onclick="@("window.location.href='" + @Url.Action("Index", "Main") + "'");" />
+}
+<input id="btnDrawChart" class="btn btn-primary" type="submit" value="Draw Chart" onclick="drawChart()" />
+@if (@Model.Count() !=0)
+{
+
+<div id="chart_div" style="width: 80%; height: 450px;"></div>
+
+<div  id="tableContent"  style="width : 80%; height: 400px;">
+        @grid.GetHtml(
+             tableStyle: "table table-bordered table-hover",
+             mode: WebGridPagerModes.NextPrevious,
+             columns: new[]
+              {
+                 grid.Column(columnName:"PageName",header:"Site Name"),
+                 grid.Column(columnName:"SpeedMin",header:"Min speed (ms)"),
+                 grid.Column(columnName:"SpeedMax",header:"Max speed (ms)")
+             })
+</div>
+}
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart());
+    function drawChart() {
+        st = $('#Site').val();
+        $.ajax({
+            url: '/History/DrawChart',
+            type: 'POST',
+            data: {site:st},
+            async: false,
+            dataType: 'json',
+            contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+            success: function (result) {
+                var arrChart = $.map(result, function (el) { return el });
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'site');
+                data.addColumn('number', 'maxValue(ms) ');
+                data.addColumn('number', 'minValue(ms) ');
+                for (var i = 0; i < arrChart.length - 1; i++) {
+                    var arrValue = arrChart[i].split(',');
+                    data.addRow([arrValue[0], parseInt(arrValue[1]), parseInt(arrValue[2])]);
+                }
+                var options = {
+                    title: 'Test result of pages speed',
+                    width: "90%", height: "90%",
+                  //  vAxis: { maxValue: 15 }
+                    //  hAxis: { title: 'Sites', titleTextStyle: { color: '#333' } },
+                    vAxis: { minValue: 0 }
+                };
+
+                var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
+                chart.draw(data, options);
+            }
+        });
+    }
+</script>
+@*@foreach (var item in Model)
+    {
+        @:data.addRow([@Html.Raw(item.PageName), @item.SpeedMin, @item.SpeedMax]);
+        }*@
