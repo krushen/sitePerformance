@@ -7,8 +7,15 @@ namespace WebPerform.App_Code
 {
     public static class SiteMapper
     {
-        public static List<string> BuildSiteMap(string url, IEnumerable<string> urlArray)
+        public static List<string> BuildSiteMap(string url, List<string> urlArray)
         {
+            for (int i = 0; i < urlArray.Count; i++)
+            {
+                string item = urlArray[i];
+                if (item.Length > 5 && item[0] == '/' && item[item.Length - 1] == '/')
+                    urlArray[i] = url + urlArray[i];
+
+            }
             HashSet<string> temp = new HashSet<string>();
             char[] tempChar = url.ToCharArray();
             string siteEtalon = "";
