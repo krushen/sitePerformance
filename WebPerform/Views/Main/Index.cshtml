@@ -5,15 +5,14 @@
 @model IEnumerable<string>
 <div style="position:relative; height:440px;">
     <div class="form-group">
-        <form action="#anchor">
+        <form action="#">
             <label for="textGo" style="font-size:13px;">Enter URL:</label>
             <input type="text" class="form-control" id="textGo" name="url" maxlength="40" style="font-size:12px;" required="required" title="example: http://www.site.com"
                    pattern="^(http|https)://[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-‌​]+$" placeholder="http://www.site.com" />
         </form>
     </div>
-    <input id="btnRun" class="btn btn-primary" type="submit" value="Run Test" /> <input id="btnChart" class="btn btn-primary" type="submit" onclick=" drawChart()" value="Drow Chart" />
-    <input id="btnRunHistory" class="btn btn-warning"
-                                                                                        type="submit" value=" History " onClick="window.location.href='@Url.Action("Index","History")';" target="_blank" />
+    <input id="btnRun" class="btn btn-primary" type="button" value="Run Test" /> <input id="btnChart" class="btn btn-primary" type="submit" onclick="drawChart()" value="Drow Chart" />
+    <input id="btnRunHistory" class="btn btn-warning" type="button" value="History" onClick="window.location.href='@Url.Action("Index","History")';" target="_blank" />
     <div><label style="font-size:12px;color:brown;" id="print"></label></div>
     <div id="chart_div"
          style="position: absolute; left: 330px; top: 0px;  width: 80%; height: 420px;">
@@ -75,7 +74,6 @@
                         dataType: 'json',
                         contentType: "application/x-www-form-urlencoded; charset=UTF-8",
                         success: function (result) {
-                            //  startTime = (new Date()).getTime();
                             var arrSite = $.map(result, function (el) { return el });
                             var $table = $('<table/>');
                             $table.addClass("table table-striped  header-fixed");
@@ -87,7 +85,6 @@
                             $table.append("</tbody>");
                             $table.attr("id", "table");
                             $table.addClass('tablesorter');
-                           // $table.attr("overflow", "scroll");
                             $("#tableContent").append($table);
                             $("#table").attr('style','height: 400px');
                             $("#table").attr('style','height: 300px');
@@ -99,20 +96,19 @@
                             var maxValue = 0;
                             var timeCount = 0;
                             var obj = {};
-                            obj.count = 15;
+                            obj.count = 5;
                             obj.counter = 1;
                             $.each(arrSite, function (index, item) {
                                 obj.counter = 1;
                                   function sendAjax() {
                                     $.ajax({
                                         url: item,
-                                        type: 'GET',
-                                       // async: false,
+                                        type: 'POST',
                                         beforeSend: function () {
                                             startTime = (new Date()).getTime();
                                             endTime = 0;
                                         },
-                                        success: function () {
+                                        success: function (data) {
                                             endTime = (new Date()).getTime();
                                             timeCount = (endTime - startTime) / 1000;
                                             $("#print").text(item + "   " + timeCount);
@@ -203,8 +199,6 @@
           $.ajax({
               url: '/Main/DrawChart',
               type: 'POST',
-              data: {},
-              async: false,
               dataType: 'json',
               contentType: "application/x-www-form-urlencoded; charset=UTF-8",
               success: function (result) {

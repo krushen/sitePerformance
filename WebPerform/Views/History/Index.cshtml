@@ -42,7 +42,7 @@
     google.charts.load('current', { 'packages': ['corechart'] });
     google.charts.setOnLoadCallback(drawChart());
     function drawChart() {
-        st = $('#Site').val();
+       var st = $('#Site').val();
         $.ajax({
             url: '/History/DrawChart',
             type: 'POST',
