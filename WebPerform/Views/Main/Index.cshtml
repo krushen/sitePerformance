@@ -179,7 +179,7 @@
         $.ajax({
             url: '/Main/DrawData',
             type: 'POST',
-            async: false,
+           // async: false,
             data: { 'urlName': urlName, 'chartInfo[]': arrChart },
             contentType: "application/x-www-form-urlencoded; charset=UTF-8",
             success: function () {

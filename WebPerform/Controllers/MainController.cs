@@ -17,7 +17,7 @@ namespace WebPerform.Controllers
             db = new ModelSiteContext();
         }
         // GET: Main
-        //[HttpGet]
+      //  [HttpGet]
         public ActionResult Index()
         {
             return View();
