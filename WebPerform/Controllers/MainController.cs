@@ -10,14 +10,14 @@ namespace WebPerform.Controllers
 {
     public class MainController : Controller
     {
-       static IList<SiteInfo> sitesInfo = new List<SiteInfo>();
+       static List<SiteInfo> sitesInfo = new List<SiteInfo>();
         ModelSiteContext db;
         public MainController()
         {
             db = new ModelSiteContext();
         }
         // GET: Main
-        //[HttpGet]
+      //  [HttpGet]
         public ActionResult Index()
         {
             return View();
@@ -30,7 +30,7 @@ namespace WebPerform.Controllers
             List<string> urls = new List<string>();
             HashSet<string> urls15 = new HashSet<string>();
             if (urlArray != null & urlName != null) urls = SiteMapper.BuildSiteMap(urlName, urlArray);
-            int j = 0;
+            //int j = 0;
             //if (urls.Count > 15)
             //{
             //    while (urls15.Count < 15)
@@ -44,7 +44,7 @@ namespace WebPerform.Controllers
                 {
                     urls15.Add(item);
                 }
-           // }
+            //}
             return Json(urls15);
         }
         [HttpPost]
