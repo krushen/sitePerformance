@@ -11,9 +11,8 @@
                    pattern="^(http|https)://[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-]+\.[a-zA-Z0-9_\-‌​]+$" placeholder="http://www.site.com" />
         </form>
     </div>
-    <input id="btnRun" class="btn btn-primary" type="submit" value="Run Test" /> <input id="btnChart" class="btn btn-primary" type="submit" onclick=" drawChart()" value="Drow Chart" />
-    <input id="btnRunHistory" class="btn btn-warning"
-                                                                                        type="submit" value=" History " onClick="window.location.href='@Url.Action("Index","History")';" target="_blank" />
+    <input id="btnRun" class="btn btn-primary" type="submit" value="Run Test" /> <input id="btnChart" class="btn btn-primary" type="submit" onclick="drawChart()" value="Draw Chart" />
+    <input id="btnRunHistory" class="btn btn-warning"  type="submit" value="History" onClick="window.location.href='@Url.Action("Index","History")';" target="_blank" />
     <div><label style="font-size:12px;color:brown;" id="print"></label></div>
     <div id="chart_div"
          style="position: absolute; left: 330px; top: 0px;  width: 80%; height: 420px;">

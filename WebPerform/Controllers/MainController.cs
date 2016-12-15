@@ -31,20 +31,20 @@ namespace WebPerform.Controllers
             HashSet<string> urls15 = new HashSet<string>();
             if (urlArray != null & urlName != null) urls = SiteMapper.BuildSiteMap(urlName, urlArray);
             int j = 0;
-            if (urls.Count > 15)
-            {
-                while (urls15.Count < 15)
-                {
-                    int rand = r.Next(0, urls.Count);
-                    urls15.Add(urls.ElementAt(rand));
-                }
-            }
-            else {
+            //if (urls.Count > 15)
+            //{
+            //    while (urls15.Count < 15)
+            //    {
+            //        int rand = r.Next(0, urls.Count);
+            //        urls15.Add(urls.ElementAt(rand));
+            //    }
+            //}
+            //else {
                 foreach (var item in urls)
                 {
                     urls15.Add(item);
                 }
-            }
+           // }
             return Json(urls15);
         }
         [HttpPost]
