@@ -96,7 +96,7 @@
                             var maxValue = 0;
                             var timeCount = 0;
                             var obj = {};
-                            obj.count = 5;
+                            obj.count = 8;
                             obj.counter = 1;
                             $.each(arrSite, function (index, item) {
                                 obj.counter = 1;
@@ -183,7 +183,7 @@
             data: { 'urlName': urlName, 'chartInfo[]': arrChart },
             contentType: "application/x-www-form-urlencoded; charset=UTF-8",
             success: function () {
-              //  drawChart();
+                drawChart();
             }
         });
     }
